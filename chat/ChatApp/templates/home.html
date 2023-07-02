@@ -1,0 +1,16 @@
+<!-- Page principale du site web -->
+{% extends "template.html" %}       <!-- hérédité de la template de base -->
+
+{% load static %}                   <!-- Chargement des fichiers statiques -->
+
+{% block css %}                     <!-- Ajout du css de la page -->
+    <link rel="stylesheet" type='text/css' href="{% static 'ChatApp/css/panel.css' %}">
+{% endblock %}
+
+{% block title %} {{ current_device.name }} {% endblock %}      <!-- Titre de la page -->
+
+{% block content %}                                             <!-- Contenu principal de la page -->
+
+<div>
+    
+</div>

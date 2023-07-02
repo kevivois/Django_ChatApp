@@ -1,0 +1,25 @@
+<!-- 
+    Template modèle de base pour les autres fichiers html
+-->
+
+<!DOCTYPE html>
+{% load static %}       <!-- permet de génerer des liens vers les fichiers statiques -->
+<head>
+    <meta charset="utf-8">
+    <title>Ceidos - {% block title %}app{% endblock %}</title> <!-- ajout d'un block pour le titre -->
+    <link rel="stylesheet" type='text/css' href="{% static 'template.css' %}"> 
+    {% block css %}     <!-- ajout d'un block pour le css -->
+    replace me 
+    {% endblock %} 
+</head>
+<body>
+    <div class="root">
+        {% block content %}
+            replace me  <!-- ajout d'un block pour le contenu principale -->
+        {% endblock %}
+    </div>
+
+    {% block scripts %}
+     <!-- ajout d'un block pour les scripts -->
+    {% endblock %}
+</body>
