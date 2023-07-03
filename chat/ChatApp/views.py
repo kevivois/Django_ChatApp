@@ -9,12 +9,11 @@ import random
 @login_required(login_url='login')                          # authentification requise pour accéder à la page
 def home_page(request):
     """
-    Page d'accueil de l'application
+    Page d'accueil de l'application : affiche les discussions de l'utilisateur
     """
-    print(request)
     user = request['user']
     Discussions = Discussion.objects.all()
-    Discussions = [discussion for discussion in Discussions if user in discussion]
+    Discussions = [discussion for discussion in Discussions if user.id in discussion.users]
     context = {'Discussions':Discussions}
     return render(request, 'home.html',context)      
 
@@ -60,4 +59,32 @@ def logout_page(request):
     """        
     logout(request)
     return redirect('login')
+
+@login_required(login_url='login')                      
+def discussion_page(request,chat_id):
+    """
+    Page de discussion
+    """        
+    user = request.user
+    discussion = Discussion.objects.get(id=chat_id)
+    if user not in discussion:
+        return redirect('home')
+    messages = Message.objects.filter(discussion=discussion)
+    context = {'messages':messages,'discussion':discussion}
+    return render(request, 'discussion.html',context)
+
+@login_required(login_url='login')
+def create_discussion_page(request):
+    """
+    Page de création de discussion
+    """        
+    user = request.user
+    users = User.objects.all()
+    if request.method == 'POST':
+        name = request.POST['name']
+        description = request.POST['description']
+        Discussion.objects.create(name=name,description=description)
+        return redirect('home')
+    context = {'users':users}
+    return render(request, 'create_discussion.html',context)
 
