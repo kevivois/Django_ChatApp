@@ -1,7 +1,7 @@
 from django.urls import path
-from ChatApp import consumers     # Importation du fichier consumers.py
+from  .consumers import AsyncChatConsumer
 
 
 websocket_urlpatterns = [       # Définition des URLS pour les websockets
-    path('chat/<str:chat_id>'),
+    path('chat/<str:chat_id>',AsyncChatConsumer.as_asgi()),
 ]

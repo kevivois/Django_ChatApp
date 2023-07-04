@@ -5,5 +5,5 @@ from django.urls.conf import include    # Importation de la fonction include ppo
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-     path('chat/', include('ChatApp.urls')),    # ajout de l'URL de l'application cloud
+     path('', include('ChatApp.urls')),    # ajout de l'URL de l'application cloud
 ]

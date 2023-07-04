@@ -7,7 +7,7 @@ import django
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))    # Ajout du répertoire parent au path
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CeidosWebApp.settings')  # Définition du module de configuration de Django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chat.settings')  # Définition du module de configuration de Django
 django.setup()  # Initialisation de Django
 
 load_dotenv()       # Chargement des variables d'environnement

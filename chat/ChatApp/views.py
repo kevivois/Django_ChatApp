@@ -2,8 +2,9 @@ import json                                                                     
 from django.shortcuts import render, redirect                                   # Pour les redirections
 from django.contrib.auth.decorators import login_required                       # Pour les permissions
 from django.contrib.auth import login, logout                                   # Pour la gestion des utilisateurs
-from django.contrib.auth.models import User                                     # Pour la gestion des utilisateurs
-from .models import Discussion,ChatUser,Message                                           # Importation des modèles de la base de données
+from .models import Discussion,ChatUser,Message                                 # Importation des modèles de la base de données
+from django.contrib.auth import get_user_model
+User = get_user_model()
 from django.db.models import Q
 import random
 @login_required(login_url='login')                          # authentification requise pour accéder à la page
@@ -23,11 +24,14 @@ def login_page(request):
     """                         
     if request.method == 'POST':        # Si la requête est de type POST , essaie d'autentifier l'utilisateur
         email = request.POST['email']
-        password = request.POST['password']                                 
-        user = User.objects.get(email=email,password=password)
-        if user and user.check_password(password):
-            login(request,user)
-            return redirect('home')                # Redirige vers la page d'accueil                          
+        password = request.POST['password']
+        try:                                 
+            user = User.objects.get(email=email,password=password)
+            if user and user.check_password(password):
+                login(request,user)
+                return redirect('home')                # Redirige vers la page d'accueil          
+        except:
+            pass            
     
     return render(request, 'login.html')            # Si la requête est de type GET, ou si l'authentification a échoué, renvoie la page de connexion
 
