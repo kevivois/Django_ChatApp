@@ -12,8 +12,6 @@ class ChatUser(AbstractUser):
     created_at = models.DateTimeField(default=now)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self) -> str:
-        return f"User {str(self.id)}"
     
 
 class Message(models.Model):
@@ -24,8 +22,6 @@ class Message(models.Model):
     created_at = models.DateTimeField(default=now)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"Message {str(self.id)} from {self.user} : {self.content}"
 
 class Discussion(models.Model):
     id = models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False,db_index=True),
@@ -37,8 +33,6 @@ class Discussion(models.Model):
     created_at = models.DateTimeField(default=now)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self) -> str:
-        return f"Discussion {str(self.id)}"
 
     
   

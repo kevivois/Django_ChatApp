@@ -18,7 +18,7 @@
     </div>
     {% endif %}
     <div id="login-parent">
-            <form id="login-form" action="{% url 'login' %}" method="post"> <!-- Formulaire de login qui envoie vers la vue login -->
+            <form id="login-form" action="{% url 'register' %}" method="post"> <!-- Formulaire de login qui envoie vers la vue login -->
                 {% csrf_token %}        <!-- Token de sécurité géré par Django -->
                 <h1>Connection</h1>
                 <div class="form-group">

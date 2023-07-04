@@ -12,5 +12,21 @@
 {% block content %}                                             <!-- Contenu principal de la page -->
 
 <div>
-    
+    Welcome to main page !
+
+
+    <div id="discussions-list">
+        {% for discussion in discussions %}
+            <div>
+                <div id="users-list">
+                    {% for user in discussion.users %}
+                            <div class="single-user">
+                                {{user.username}}
+                            </div>
+                    {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
 </div>
+{% endblock %}
+

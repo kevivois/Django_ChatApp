@@ -8,52 +8,71 @@ User = get_user_model()
 from django.db.models import Q
 import random
 @login_required(login_url='login')                          # authentification requise pour accéder à la page
-def home_page(request):
+def  home_page(request):
     """
     Page d'accueil de l'application : affiche les discussions de l'utilisateur
     """
-    user = request['user']
+
+    user = request.user
     Discussions = Discussion.objects.all()
-    Discussions = [discussion for discussion in Discussions if user.id in discussion.users]
-    context = {'Discussions':Discussions}
+    Discussions = [discussion for discussion in Discussions if str(user.id) in discussion.users['users']]
+    for d in Discussions:
+        users = []
+        for u in d.users['users']:
+           fetchedUser = User.objects.filter(id=u)
+           if fetchedUser.exists():
+               users.append(fetchedUser.get())    
+        d.users = []
+        d.users = users
+        print(d.users)
+
+    context = {'discussions':Discussions}
     return render(request, 'home.html',context)      
 
 def login_page(request):
     """
-    Page de connexion de l'utilisateur 
-    """                         
-    if request.method == 'POST':        # Si la requête est de type POST , essaie d'autentifier l'utilisateur
-        email = request.POST['email']
-        password = request.POST['password']
-        try:                                 
-            user = User.objects.get(email=email,password=password)
-            if user and user.check_password(password):
-                login(request,user)
-                return redirect('home')                # Redirige vers la page d'accueil          
-        except:
-            pass            
-    
-    return render(request, 'login.html')            # Si la requête est de type GET, ou si l'authentification a échoué, renvoie la page de connexion
+    Page de connexion de l'utilisateur
+    """
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        try:
+            user = User.objects.get(email=email)
+            if user.check_password(password):
+                login(request, user)
+                print(f'user {user.email} logged -> return to home')
+                return redirect('home')
+            else:
+                print('incorrect password')
+        except User.DoesNotExist:
+            print('user does not exist')
+
+    return render(request, 'login.html')
 
 
 def register_page(request):
     """
-    Page de création de l'utilisateur 
-    """                         
-    if request.method == 'POST':        # Si la requête est de type POST , essaie d'autentifier l'utilisateur
-        email = request.POST['email']
-        username = request.POST['username']
-        password = request.POST['password']                                 
-        user = User.objects.get(email=email)
-        if not user:
-            user = User.objects.get(username=username)
-            if not user:
-                User.objects.create(email=email,username=username,password=password)
-                return redirect('home')
-            else:
-                print('user existing')                  
-    
-    return render(request, 'register.html')            # Si la requête est de type GET, ou si l'authentification a échoué, renvoie la page de connexion
+    Page de création de l'utilisateur
+    """
+    if request.method == 'POST':
+        print('register page POST')
+        email = request.POST.get('email')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        print(email,username,password)
+        # Vérifier si l'utilisateur existe déjà par adresse e-mail
+        if User.objects.filter(email=email).exists():
+            print('user existing')
+        elif User.objects.filter(username=username).exists():
+            print('user existing')
+        else:
+            # Créer un nouvel utilisateur et le connecter
+            user = User.objects.create_user(email=email, username=username, password=password)
+            login(request, user)
+            return redirect('home')
+        
+    return render(request, 'register.html')
 
 
 @login_required(login_url='login')                      # authentification requise pour accéder à la page
