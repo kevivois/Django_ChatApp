@@ -24,7 +24,6 @@ def  home_page(request):
                users.append(fetchedUser.get())    
         d.users = []
         d.users = users
-        print(d.users)
 
     context = {'discussions':Discussions}
     return render(request, 'home.html',context)      
@@ -63,9 +62,9 @@ def register_page(request):
         print(email,username,password)
         # Vérifier si l'utilisateur existe déjà par adresse e-mail
         if User.objects.filter(email=email).exists():
-            print('user existing')
+            print('user email existing')
         elif User.objects.filter(username=username).exists():
-            print('user existing')
+            print('user username existing')
         else:
             # Créer un nouvel utilisateur et le connecter
             user = User.objects.create_user(email=email, username=username, password=password)

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Model
 from django.contrib.auth.models import AbstractUser
 import uuid
 from django.utils.timezone import now
@@ -14,7 +15,7 @@ class ChatUser(AbstractUser):
 
     
 
-class Message(models.Model):
+class Message(Model):
     id = models.UUIDField(db_index=True,primary_key=True,default=uuid.uuid4)
     discussion = models.ForeignKey('Discussion',on_delete=models.CASCADE)
     user = models.ForeignKey(ChatUser,on_delete=models.DO_NOTHING) 
@@ -23,9 +24,9 @@ class Message(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Discussion(models.Model):
-    id = models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False,db_index=True),
-    title = models.CharField(max_length=255),
+class Discussion(Model):
+    id = models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False,db_index=True)
+    name = models.CharField(max_length=255,null=True)
     description = models.CharField(max_length=500)
     picture = models.ImageField()
     messages = models.JSONField()

@@ -16,16 +16,14 @@
 
 
     <div id="discussions-list">
-        {% for discussion in discussions %}
-            <div>
-                <div id="users-list">
-                    {% for user in discussion.users %}
-                            <div class="single-user">
-                                {{user.username}}
-                            </div>
-                    {% endfor %}
-            </div>
-        {% endfor %}
+        {% if discussions|length > 0 %}
+            {% for discussion in discussions %}
+                <div id="single-discussion">
+                    {{discussion.name}}
+                    users count : {{discussion.users|length}}
+                </div>
+            {% endfor %}
+        {% endif %}
     </div>
 </div>
 {% endblock %}
