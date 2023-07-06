@@ -14,18 +14,18 @@ def  home_page(request):
     """
 
     user = request.user
-    Discussions = Discussion.objects.all()
-    Discussions = [discussion for discussion in Discussions if str(user.id) in discussion.users['users']]
-    for d in Discussions:
-        users = []
-        for u in d.users['users']:
-           fetchedUser = User.objects.filter(id=u)
-           if fetchedUser.exists():
-               users.append(fetchedUser.get())    
-        d.users = []
-        d.users = users
-
-    context = {'discussions':Discussions}
+    discussions = []
+    for d in Discussion.objects.all():
+        """
+        Vérfifier si chaque d.users  est loadable en tant que json
+        Si oui, on le load et on le remplace par le json
+        """
+        user = request.user
+        if str(user.id) in d.get_users() and d.is_valid():
+            d.users = d.fetch_users()
+            discussions.append(d)
+        
+    context = {'discussions':discussions}
     return render(request, 'home.html',context)      
 
 def login_page(request):
@@ -83,15 +83,22 @@ def logout_page(request):
     return redirect('login')
 
 @login_required(login_url='login')                      
-def discussion_page(request,chat_id):
+def discussion_page(request,discussion_id):
     """
     Page de discussion
     """        
     user = request.user
-    discussion = Discussion.objects.get(id=chat_id)
-    if user not in discussion:
+    discussion = Discussion.objects.filter(id=discussion_id)
+    if not discussion.exists():
         return redirect('home')
-    messages = Message.objects.filter(discussion=discussion)
+    discussion = discussion.get()
+
+    if str(user.id) not in discussion.get_users():
+        return redirect('home')
+    
+    messages = Message.objects.all()
+    messages = [message for message in messages if str(message.id) in discussion.get_messages()]
+    
     context = {'messages':messages,'discussion':discussion}
     return render(request, 'discussion.html',context)
 
@@ -99,14 +106,29 @@ def discussion_page(request,chat_id):
 def create_discussion_page(request):
     """
     Page de création de discussion
-    """        
+    """
     user = request.user
-    users = User.objects.all()
+    users = User.objects.all().exclude(id=user.id)
+    
     if request.method == 'POST':
         name = request.POST['name']
         description = request.POST['description']
-        Discussion.objects.create(name=name,description=description)
-        return redirect('home')
-    context = {'users':users}
-    return render(request, 'create_discussion.html',context)
+        
+        try:
+            selected_users = request.POST.getlist('users')
+            if str(user.id) not in selected_users:
+                selected_users.append(str(user.id))
+            users_dict = {}
+            users_dict['users'] = selected_users
+        except:
+            selected_users = []
+            selected_users.append(str(user.id))
+            users_dict = {}
+            users_dict['users'] = selected_users
+        
+        Discussion.objects.create(name=name, description=description, users=users_dict)
+        return redirect('discussion', discussion_id=Discussion.objects.filter(name=name, description=description).get().id)
+    
+    context = {'users': users}
+    return render(request, 'create_discussion.html', context)
 

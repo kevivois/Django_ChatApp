@@ -19,11 +19,13 @@
         {% if discussions|length > 0 %}
             {% for discussion in discussions %}
                 <div id="single-discussion">
-                    {{discussion.name}}
-                    users count : {{discussion.users|length}}
+                    <a href="{% url 'discussion' discussion.id %}">Discussion {{dicussion.name}} </a>
                 </div>
             {% endfor %}
         {% endif %}
+    </div>
+    <div>
+        <a href="{% url 'create_discussion' %}">Créer une discussion</a>
     </div>
 </div>
 {% endblock %}

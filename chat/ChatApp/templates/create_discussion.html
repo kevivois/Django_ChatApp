@@ -1,0 +1,32 @@
+<!-- Page principale du site web -->
+{% extends "template.html" %}       <!-- hérédité de la template de base -->
+
+{% load static %}                   <!-- Chargement des fichiers statiques -->
+
+{% block css %}                     <!-- Ajout du css de la page -->
+    <link rel="stylesheet" type='text/css' href="{% static 'ChatApp/css/create_discussion.css' %}">
+{% endblock %}
+
+{% block content %}                                             <!-- Contenu principal de la page -->
+
+<div>
+    <h1>Créer une discussion</h1>
+    <form action="{% url 'create_discussion' %}" method="post">  <!-- Formulaire de création de discussion -->
+        {% csrf_token %}
+        <label for="name">Nom</label>
+        <input type="text" name="name" id="name" required>
+        <label for="description">Description</label>
+        <input type="text" name="description" id="description">
+        <select name="users" id="users" multiple>
+            {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+            {% endfor %}
+        </select>
+        <label for="image">Image</label>
+        <input type="file" name="image" id="image" accept="image/png, image/jpeg, image/jpg">
+        <input type="submit" value="Créer">
+    </form>
+    <a href="{% url 'home' %}">Retour</a>
+</div>
+{% endblock %}
+
