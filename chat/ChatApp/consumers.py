@@ -30,7 +30,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
         await self.accept() # autorisation de connexion du client websocket
 
     async def receive(self, text_data=None, bytes_data=None):
-        print(self)
+        print(text_data)
         return await super().receive(text_data, bytes_data)
     
     async def disconnect(self, close_code):

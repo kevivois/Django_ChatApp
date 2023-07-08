@@ -4,7 +4,7 @@
 {% load static %}                   <!-- Chargement des fichiers statiques -->
 
 {% block css %}                     <!-- Ajout du css de la page -->
-    <link rel="stylesheet" type='text/css' href="{% static 'ChatApp/css/panel.css' %}">
+    <link rel="stylesheet" type='text/css' href="{% static 'ChatApp/css/discussion.css' %}">
 {% endblock %}
 
 {% block title %} {{ current_device.name }} {% endblock %}      <!-- Titre de la page -->
@@ -19,7 +19,7 @@
             {% for message in messages %}
                 <div id="single-message">
                     <p>{{ message.content }}</p>
-                    <p>{{ message.date }}</p>
+                    <p>{{ message.created_at }}</p>
                 </div>
             {% endfor %}
         {% endif %}
@@ -34,6 +34,55 @@
             {% endfor %}
         {% endif %}
     </div>
+
+    <div id ="message-form">
+        <form action="javascript:send_message()" method="post" id="message-form"> <!-- Envoi du message au serveur via le websocket -->
+            {% csrf_token %}
+            <input type="text" name="message" id="message" placeholder="Message">
+            <input type="submit" value="Send">
+        </form>
 </div>
+
+
+
+<script>
+
+    function connect_to_socket(){
+        // get current url without http://
+        const { protocol, hostname, port } = new URL(window.location.href);
+        var socket = new WebSocket(`ws://${hostname}:${port}/ws/chat/{{ discussion.id }}`);
+        socket.onmessage = function(e){
+            var data = JSON.parse(e.data);
+            var message = data['message'];
+            var username = data['username'];
+            var created_at = data['created_at'];
+            var message_list = document.getElementById('messages-list');
+            var message_div = document.createElement('div');
+            message_div.setAttribute('id', 'single-message');
+            var message_p = document.createElement('p');
+            message_p.innerHTML = message;
+            var username_p = document.createElement('p');
+            username_p.innerHTML = username;
+            var created_at_p = document.createElement('p');
+            created_at_p.innerHTML = created_at;
+            message_div.appendChild(message_p);
+            message_div.appendChild(username_p);
+            message_div.appendChild(created_at_p);
+            message_list.appendChild(message_div);
+        }
+        return socket;
+    }
+    function send_message(){
+        var message_content = document.getElementById('message').value;
+        var message = {
+            'content': message_content,
+            'user': '{{ user.id }}',
+        }
+            socket.send(message);
+        console.log('message sent',socket)
+    }
+
+    let socket = connect_to_socket();
+</script>
 {% endblock %}
 
