@@ -12,6 +12,6 @@ django.setup()  # Initialisation de Django
 
 load_dotenv()       # Chargement des variables d'environnement
 
-bind = "localhost:8080"
+bind = "localhost:3000"
 worker_class = "uvicorn.workers.UvicornWorker"
 workers = 1                                                  # Nombre de workers pour le serveur

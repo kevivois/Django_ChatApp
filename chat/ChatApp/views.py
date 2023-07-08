@@ -99,7 +99,7 @@ def discussion_page(request,discussion_id):
     messages = Message.objects.all()
     messages = [message for message in messages if str(message.id) in discussion.get_messages()]
     
-    context = {'messages':messages,'discussion':discussion}
+    context = {'messages':messages,'discussion':discussion,'users':discussion.fetch_users()}
     return render(request, 'discussion.html',context)
 
 @login_required(login_url='login')

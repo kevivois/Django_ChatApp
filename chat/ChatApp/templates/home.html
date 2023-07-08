@@ -13,13 +13,12 @@
 
 <div>
     Welcome to main page !
-
-
+    
     <div id="discussions-list">
         {% if discussions|length > 0 %}
             {% for discussion in discussions %}
                 <div id="single-discussion">
-                    <a href="{% url 'discussion' discussion.id %}">Discussion {{dicussion.name}} </a>
+                    <a href="{% url 'discussion' discussion.id %}">Discussion {{ dicussion.name }} </a>
                 </div>
             {% endfor %}
         {% endif %}

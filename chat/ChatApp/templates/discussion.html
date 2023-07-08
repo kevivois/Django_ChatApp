@@ -14,12 +14,22 @@
 <div>
     Welcome to discussion {{discussion.id}}
 
-
-    <div id="discussions-list">
-        {% if discussions|length > 0 %}
-            {% for discussion in discussions %}
-                <div id="single-discussion">
-                    <a href="{% url 'discussion' discussion.id %}">Discussion {{dicussion.name}} </a>
+    <div id="messages-list">
+        {% if messages|length > 0 %}
+            {% for message in messages %}
+                <div id="single-message">
+                    <p>{{ message.content }}</p>
+                    <p>{{ message.date }}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+    </div>
+    <div id="users-list">
+        {% if users|length > 0 %}
+            {% for user in users %}
+                <div id="single-user">
+                    <p>user {{ user.username }}</p>
                 </div>
             {% endfor %}
         {% endif %}
