@@ -7,9 +7,10 @@ import datetime                                                                 
 import json                     
 import asyncio                                                                  # Pour les boucles asynchrones
 import uuid                                                                     # Pour générer des identifiants uniques
-from ChatApp.models import Message,ChatUser                                    # Import des modèles                   
+from ChatApp.models import Message,ChatUser,Discussion                                    # Import des modèles                   
 from channels.generic.websocket import StopConsumer,AsyncWebsocketConsumer      # Pour les websockets
 from django.conf import settings                                                # Pour accéder aux paramètres de l'application
+from asgiref.sync import sync_to_async
 
 dev = settings.MODE == settings.MODES.get("DEV")                                # varibable booléenne pour savoir si l'on est en mode DEV ou PROD
 
@@ -30,7 +31,33 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
         await self.accept() # autorisation de connexion du client websocket
 
     async def receive(self, text_data=None, bytes_data=None):
-        print(text_data)
+        try:
+            data = json.loads(text_data) # récupération des données envoyées par le client websocket
+            user_id = data.get("user") # récupération de l'utilisateur
+            user = await sync_to_async(ChatUser.objects.get)(id=user_id)
+            if not user or self.chat_id != data.get("discussion"):
+                raise Exception("User not found")
+            if data.get("type") == "message":
+                discussion_id = self.chat_id
+                discussion = await sync_to_async(Discussion.objects.get)(id=discussion_id)
+                users = await discussion.async_fetch_users()
+                if user not in users:
+                    raise Exception("User not in discussion")
+                last_message = await sync_to_async(Message.objects.create)( 
+                    user=user,
+                    discussion=discussion,
+                    content=data.get("content"),
+                )
+                await discussion.async_add_message(str(last_message.id))
+            await self.send(
+                self.group_name,
+                {
+                    'type': 'message',
+                    'data': data
+                }
+            )
+        except Exception as e:
+            data = None
         return await super().receive(text_data, bytes_data)
     
     async def disconnect(self, close_code):
@@ -44,7 +71,6 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
             self.group_name,
             self.channel_name
         )
-        print(f"Client disconnected from topic {self.topic} with close code {close_code}")
         raise StopConsumer() # arrêt du consommateur websocket
 
 

@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 import uuid
 from django.utils.timezone import now
 import json,ast
+from asgiref.sync import sync_to_async
 
 def default_uuid_value():
     return str(uuid.uuid4())
@@ -41,6 +42,35 @@ class Discussion(Model):
     users = models.JSONField(default=default_json_users_value)
     created_at = models.DateTimeField(default=now)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def add_user(self,user_id):
+        if self.is_valid():
+            users = self.get_users()
+            if user_id not in users:
+                self.users['users'].append(user_id)
+                self.save()
+    def remove_user(self,user_id):
+        if self.is_valid():
+            users = self.get_users()
+            if user_id in users:
+                self.users['users'].remove(user_id)
+                self.save()
+    async def async_add_message(self,message_id):
+        if self.is_valid():
+            messages = self.get_messages()
+            print(message_id not in messages)
+            if message_id not in messages:
+                self.messages['messages'].append(message_id)
+                print(self.messages,"trying to save")
+                await sync_to_async(self.save)()
+                print('saved')
+    def remove_message(self,message_id):
+        if self.is_valid():
+            messages = self.get_messages()
+            if message_id in messages:
+                self.messages['messages'].remove(message_id)
+                self.save()
+                
 
     def is_valid(self):
         if self.name == '':
@@ -82,9 +112,21 @@ class Discussion(Model):
         return False
     
     def get_messages(self):
-        if self.has_messages():
-            return self.messages['messages']
+            return self.messages['messages'] or []
+    
+    async def async_fetch_messages(self):
+        if self.is_valid():
+            messages = []
+            for message_id in self.get_messages():
+                try:
+                    message = await sync_to_async(Message.objects.get)(id=message_id)
+                    messages.append(message)
+                except Message.DoesNotExist:
+                    pass
+            return messages
         return []
+    
+
     def get_users(self):
         if self.has_users():
             return self.users['users']
@@ -104,6 +146,22 @@ class Discussion(Model):
                     pass
             return users
         return []
+    
+    async def async_fetch_users(self):
+        """
+        Récupérer les utilisateurs de la discussion
+        """
+        if self.is_valid():
+            users = []
+            for user_id in self.get_users():
+                try:
+                    user = await sync_to_async(ChatUser.objects.get)(id=user_id)
+                    users.append(user)
+                except ChatUser.DoesNotExist:
+                    pass
+            return users
+        return []
+
 
     
   

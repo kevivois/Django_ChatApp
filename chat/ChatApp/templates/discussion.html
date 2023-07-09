@@ -36,7 +36,7 @@
     </div>
 
     <div id ="message-form">
-        <form action="javascript:send_message()" method="post" id="message-form"> <!-- Envoi du message au serveur via le websocket -->
+        <form action="javascript:send_message('message')" method="post" id="message-form"> <!-- Envoi du message au serveur via le websocket -->
             {% csrf_token %}
             <input type="text" name="message" id="message" placeholder="Message">
             <input type="submit" value="Send">
@@ -52,6 +52,7 @@
         const { protocol, hostname, port } = new URL(window.location.href);
         var socket = new WebSocket(`ws://${hostname}:${port}/ws/chat/{{ discussion.id }}`);
         socket.onmessage = function(e){
+            console.log('message received', e);
             var data = JSON.parse(e.data);
             var message = data['message'];
             var username = data['username'];
@@ -72,14 +73,16 @@
         }
         return socket;
     }
-    function send_message(){
+    function send_message(type){
         var message_content = document.getElementById('message').value;
         var message = {
+            'type': type,
             'content': message_content,
             'user': '{{ user.id }}',
+            'discussion': '{{ discussion.id }}',	
         }
+        message = JSON.stringify(message);
             socket.send(message);
-        console.log('message sent',socket)
     }
 
     let socket = connect_to_socket();
