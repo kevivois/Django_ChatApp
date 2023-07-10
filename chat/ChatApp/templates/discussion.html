@@ -17,19 +17,25 @@
     <div id="messages-list">
         {% if messages|length > 0 %}
             {% for message in messages %}
-                <div id="single-message">
+                {% if message.user == request.user %}
+                    <div class="my-message">
+                        <p>moi</p>
+                {% else %}
+                    <div class="other-message">
+                        <p>{{ message.user.username }}</p>
+                {% endif %}
                     <p>{{ message.content }}</p>
-                    <p>{{ message.created_at }}</p>
-                </div>
+                    </div>
             {% endfor %}
         {% endif %}
-        
     </div>
+    <br />
+    Users
     <div id="users-list">
         {% if users|length > 0 %}
             {% for user in users %}
                 <div id="single-user">
-                    <p>user {{ user.username }}</p>
+                    <p>{{ user.username }}</p>
                 </div>
             {% endfor %}
         {% endif %}
@@ -52,24 +58,26 @@
         const { protocol, hostname, port } = new URL(window.location.href);
         var socket = new WebSocket(`ws://${hostname}:${port}/ws/chat/{{ discussion.id }}`);
         socket.onmessage = function(e){
-            console.log('message received', e);
+            console.log(e,e.data)
             var data = JSON.parse(e.data);
-            var message = data['message'];
-            var username = data['username'];
-            var created_at = data['created_at'];
             var message_list = document.getElementById('messages-list');
-            var message_div = document.createElement('div');
-            message_div.setAttribute('id', 'single-message');
-            var message_p = document.createElement('p');
-            message_p.innerHTML = message;
-            var username_p = document.createElement('p');
-            username_p.innerHTML = username;
-            var created_at_p = document.createElement('p');
-            created_at_p.innerHTML = created_at;
-            message_div.appendChild(message_p);
-            message_div.appendChild(username_p);
-            message_div.appendChild(created_at_p);
-            message_list.appendChild(message_div);
+            var users_list = document.getElementById('users-list');
+            if(data.type == 'message'){
+                var message = document.createElement('div');
+                if(data.user == '{{ user.id }}'){
+                    message.className = 'my-message';
+                    var user = 'moi';
+                }else{
+                    message.className = 'other-message';
+                    var user = data.user;
+                }
+                message.innerHTML = '<p>' + user + '</p><p>' + data.content + '</p>';
+                message_list.appendChild(message);
+                print(message_list);
+            }
+
+            // scroll down to the last message
+            message_list.scrollTop = message_list.scrollHeight;
         }
         return socket;
     }

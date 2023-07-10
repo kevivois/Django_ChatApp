@@ -49,13 +49,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
                     content=data.get("content"),
                 )
                 await discussion.async_add_message(str(last_message.id))
-            await self.send(
-                self.group_name,
-                {
-                    'type': 'message',
-                    'data': data
-                }
-            )
+            self.channel_layer.group_send(self.group_name, data)
         except Exception as e:
             data = None
         return await super().receive(text_data, bytes_data)
