@@ -35,7 +35,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data) # récupération des données envoyées par le client websocket
             user_id = data.get("user") # récupération de l'utilisateur
             user = await sync_to_async(ChatUser.objects.get)(id=user_id)
-            if not user or self.chat_id != data.get("discussion"):
+            if not user or self.chat_id != data.get("discussion") and user_id != self.scope['user'].id:
                 raise Exception("User not found")
             if data.get("type") == "message":
                 discussion_id = self.chat_id
@@ -49,10 +49,21 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
                     content=data.get("content"),
                 )
                 await discussion.async_add_message(str(last_message.id))
-            self.channel_layer.group_send(self.group_name, data)
+            await self.channel_layer.group_send(self.group_name,{
+                'type': 'chat_message',
+                'message':data
+            })
         except Exception as e:
             data = None
         return await super().receive(text_data, bytes_data)
+    
+    async def chat_message(self, event):
+        """
+        Méthode publique asynchrone appelée lors de la réception d'un message par le groupe de consommateurs websocket.
+        Elle envoie le message au client websocket.
+        """
+        message = event['message']
+        await self.send(text_data=json.dumps(message))
     
     async def disconnect(self, close_code):
         """

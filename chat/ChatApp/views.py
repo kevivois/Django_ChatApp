@@ -40,7 +40,6 @@ def login_page(request):
             user = User.objects.get(email=email)
             if user.check_password(password):
                 login(request, user)
-                print(f'user {user.email} logged -> return to home')
                 return redirect('home')
             else:
                 print('incorrect password')
@@ -55,16 +54,14 @@ def register_page(request):
     Page de création de l'utilisateur
     """
     if request.method == 'POST':
-        print('register page POST')
         email = request.POST.get('email')
         username = request.POST.get('username')
         password = request.POST.get('password')
-        print(email,username,password)
         # Vérifier si l'utilisateur existe déjà par adresse e-mail
         if User.objects.filter(email=email).exists():
-            print('user email existing')
+            pass
         elif User.objects.filter(username=username).exists():
-            print('user username existing')
+            pass
         else:
             # Créer un nouvel utilisateur et le connecter
             user = User.objects.create_user(email=email, username=username, password=password)

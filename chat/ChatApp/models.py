@@ -58,12 +58,10 @@ class Discussion(Model):
     async def async_add_message(self,message_id):
         if self.is_valid():
             messages = self.get_messages()
-            print(message_id not in messages)
             if message_id not in messages:
                 self.messages['messages'].append(message_id)
-                print(self.messages,"trying to save")
                 await sync_to_async(self.save)()
-                print('saved')
+                print('added message')
     def remove_message(self,message_id):
         if self.is_valid():
             messages = self.get_messages()
@@ -87,8 +85,7 @@ class Discussion(Model):
             if 'users' not in self.users or 'messages' not in self.messages:
                 raise Exception('not corrects properties')
 
-        except Exception as e:
-            print(e)
+        except Exception:
             return False
         return True
     def make_lists_valid(self):
